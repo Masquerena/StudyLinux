@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试页面</title>
+    <!-- <style>
+        #_title {
+            color: red;
+            font-size: 20px;
+        }
+    </style> -->
+</head>
+<body>
+    <h1 class="cred">Hello world</h1>
+    <h2 id="_title">Hello world</h2>
+    <h2 >Hello world</h2>
+    <p>111111111111</p>22222222222<br/>33333333
+    <img src="./test.png" width="540px" height="360px">
+    <a herf= "https://www.baidu.com">这是一个超链接</a>
+    <ul>
+        <li>ul和li组合无序列表</li>
+        <li>ul和li组合无序列表</li>
+    </ul>
+    <ol>
+        <li>ol和li组合有序列表</li>
+        <li>ol和li组合有序列表</li>
+    </ol>
+    <dl>
+        <dt>dt是小标题</dt>
+        <dd>dd是围绕标题说明</dd>
+        <dd>dd是围绕标题说明</dd>
+    </dl>
+    <form action="http://43.142.247.17:8085/login" method="post">
+        <input type="text" id="username" name="username">
+        <input type="password" id="password" name="password">
+        <br/>
+        <input type="submit" name="submit" value="提交">
+    </form>
+    <button onclick="test()">一个普通的button</button>
+</body>
+<script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js">
+</script>
+<script>
+    var ws = new WebSocket("ws://43.142.247.17:8085/ws");
+    ws.onopen = function() {
+        alert("ws 握手成功");
+    }
+    ws.onerror = function() {
+        alert("ws 握手失败");
+    }
+    ws.onclose = function() {
+        alert("ws 连接关闭");
+    }
+    ws.onmessage = function(evt) {
+        // alert(evt.data);
+        var h2 = document.getElementById("_title");
+        alert(h2.innerHTML);
+        h2.innerHTML = evt.data;
+    }
+
+    function test()
+    {
+        ws.send(document.getElementById("username").value);
+        document.getElementById("username").value ="";
+
+        // alert("hello");
+        // var h2 = document.getElementById("_title");
+        // alert(h2.innerHTML);
+        // h2.innerHTML = "hello person";
+
+        // var input = document.getElementById("username");
+        // alert(input.value);
+        // input.value="";
+
+        // var login_info = {
+        //     username:document.getElementById("username").value,
+        //     password:document.getElementById("password").value
+        // }
+        // $.ajax 
+        // (
+        //     {
+        //         type: "post",
+        //         url: "http://43.142.247.17:8085/login",
+        //         data: JSON.stringify(login_info),
+        //         success: function(res, statu, xhr)
+        //         {
+        //             alert(res);
+        //         },
+        //         error: function(xhr)
+        //         {
+        //             alert(JSON.stringify(xhr));
+        //         }
+        //     }
+        // )
+    }
+</script>
+</html>

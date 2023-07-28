@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录</title>
+
+    <link rel="stylesheet" href="./css/common.css">
+    <link rel="stylesheet" href="./css/login.css">
+</head>
+<body>
+    <div class="nav">
+        网络五子棋对战游戏
+    </div>
+    <div class="login-container">
+        <!-- 登录界面的对话框 -->
+        <div class="login-dialog">
+            <!-- 提示信息 -->
+            <h3>登录</h3>
+            <!-- 这个表示一行 -->
+            <div class="row">
+                <span>用户名</span>
+                <input type="text" id="user_name">
+            </div>
+            <!-- 这是另一行 -->
+            <div class="row">
+                <span>密码</span>
+                <input type="password" id="password">
+            </div>
+            <!-- 提交按钮 -->
+            <div class="row">
+                <button id="submit" onclick="login()">提交</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="./js/jquery.min.js"></script>
+    <script>
+        //1. 给登录按钮添加点击事件，注册调用函数
+        //2. 封装登录请求函数
+        function login()
+        {
+            //1. 从输入框中获取用户名和密码,并组织成json格式
+            var log_info = {
+                username: document.getElementById("user_name").value,
+                password: document.getElementById("password").value
+            };
+            //2. 通过ajax向后台发送登录请求
+            $.ajax
+            (
+                {
+                    url: "/login",
+                    type: "post",
+                    data: JSON.stringify(log_info),
+                    success: function(res)//请求成功，跳转到登录页面
+                    {
+                        alert("登录成功");
+                        window.location.assign("/game_hall.html");
+                    },
+                    error: function(xhr)//返回结果为false，说明请求失败，清空输入框并提示错误原因
+                    {
+                        document.getElementById("user_name").value = "";
+                        document.getElementById("password").value = "";
+                        alert(JSON.stringify(xhr));
+                    }
+                }
+            )
+        }
+    </script>
+</body>
+</html>

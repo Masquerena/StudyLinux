@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏大厅</title>
+    <link rel="stylesheet" href="./css/common.css">
+    <link rel="stylesheet" href="./css/game_hall.css">
+</head>
+<body>
+    <div class="nav">网络五子棋对战游戏</div>
+    <!-- 整个页面的容器元素 -->
+    <div class="container">
+        <!-- 这个 div 在 container 中是处于垂直水平居中这样的位置的 -->
+        <div>
+            <!-- 展示用户信息 -->
+            <div id="screen"></div>
+            <!-- 匹配按钮 -->
+            <div id="match-button">开始匹配</div>
+        </div>
+    </div>
+
+    <script src="./js/jquery.min.js"></script>
+    <script>
+        var ws_url = "ws://" + location.host + "/hall";//设置websocket长连接的url
+        var ws_hdl = null;//设置句柄
+
+        window.onbeforeunload = function()//页面关闭后的处理函数
+        {ws_hdl.close();}
+
+        //1. 给提交按钮添加点击事件，该按钮存在两种状态，分别是未匹配和匹配状态
+        var button_flag = "stop";
+        var be = document.getElementById("match-button");
+        //2. 添加点击按钮的事件处理
+        be.onclick = function()
+        {
+            if(button_flag == "stop")
+            {
+                //没有进行匹配的情况下点击按钮，进行匹配
+                var req_json = {
+                    optype: "match_start"
+                }
+                ws_hdl.send(JSON.stringify(req_json));
+            }
+            else
+            {
+                //在匹配的情况下点击按钮，停止匹配
+                var req_json = {
+                    optype: "match_stop"
+                }
+                ws_hdl.send(JSON.stringify(req_json));
+            }
+        }
+
+        // //注册调用函数
+        function get_user_info()
+        {
+            //通过ajax向服务器发送获取用户信息的请求
+            $.ajax
+            (
+                {
+                    url: "/info",
+                    type: "get",
+                    success: function(res) 
+                    {
+                        var info_html = "<p>" + "用户：" + res.username + " 积分：" + res.score + 
+                        "</br>" + "比赛场次：" + res.total_count + " 获胜场次：" + res.win_count + "</p>";
+                        var screen_div = document.getElementById("screen");//获取id为screen的控件
+                        screen_div.innerHTML = info_html;//给screen空间添加如上信息
+
+                        ws_hdl = new WebSocket(ws_url);
+                        ws_hdl.onopen = ws_onopen;
+                        ws_hdl.onclose = ws_onclose;
+                        ws_hdl.onerror = ws_onerror;
+                        ws_hdl.onmessage = ws_onmessage;
+                    },
+                    error: function(xhr) 
+                    {
+                        alert(JSON.stringify(xhr));
+                        location.replace("/login.html");
+                    }
+                }
+            )
+        }
+        function ws_onopen() {console.log("websocket onopen");}
+        function ws_onclose() {console.log("websocket onclose");}
+        function ws_onerror() {console.log("websocket onerror");}
+        function ws_onmessage(evt)
+        {
+            var rsp_json = JSON.parse(evt.data);//将响应正文反序列化
+            if(rsp_json.result == false)//result字段结果为false，说明请求失败，重新登录
+            {
+                alert(evt.data);
+                location.replace("/login.html");
+                return;
+            }
+            else if(rsp_json["optype"] == "hall_ready")
+            {
+                alert("游戏大厅连接成功");
+            }
+            else if(rsp_json["optype"] == "match_success")//返回的响应表示匹配成功，需要进入游戏房间
+            {
+                alert("对战匹配成功，进入游戏房间！");
+                location.replace("/game_room.html");
+            }
+            else if(rsp_json["optype"] == "match_start")//返回的响应表示已经将用户加入匹配队列
+            {
+                console.log("用户已经加入匹配队列");
+                button_flag = "start";
+                be.innerHTML = "匹配中...点击按钮停止匹配";//修改按钮中显示的内容
+                return;
+            }
+            else if(rsp_json["optype"] == "match_stop")//返回的响应表示已经停止用户匹配
+            {
+                console.log("玩家已经被移除出匹配队列");
+                button_flag = "stop";
+                be.innerHTML = "开始匹配";
+                return;
+            }
+            else//出现未知错误，跳转回登录页面
+            {
+                alert(evt.data);
+                location.replace("/login.html");
+                return;
+            }
+        }
+        get_user_info();//调用该函数
+    </script>
+</body>
+</html>
