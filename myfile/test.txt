@@ -1,0 +1,8 @@
+hello
+open fd : 3
+hello
+open fd : 3
+hello
+open fd : 3
+hello
+open fd : 3
